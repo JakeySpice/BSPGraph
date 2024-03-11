@@ -8,9 +8,9 @@ function addNode(event) {
     // Create an object with the node data
     const nodeData = {
         nodeLabel: nodeLabel
-        
-    }; 
-    
+
+    };
+
     // Send a POST request to the server to add the node
     fetch('/nodes', {
         method: 'POST',
@@ -23,12 +23,13 @@ function addNode(event) {
             if (response.ok) {
                 // Node added successfully
                 console.log('Node added successfully');
-                
+
                 // Clear the input field
                 document.getElementById('user-input').value = '';
 
                 // Refresh the graph or perform any other necessary actions
                 refreshGraph();
+                populateNodeDropdowns();
             } else {
                 // Error adding node
                 console.error('Error adding node');
@@ -47,6 +48,7 @@ function refreshGraph() {
         .then(data => {
             // Update the graph visualization with the new data
             updateGraph(data);
+            console.log(data);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -59,7 +61,6 @@ function updateGraph(graphData) {
     // Use vis.js library to update the graph
     const nodes = new vis.DataSet(graphData.nodes);
     const edges = new vis.DataSet(graphData.relationships);
-    console.log(nodes);
 
     const container = document.getElementById('network');
 
@@ -96,7 +97,7 @@ function updateGraph(graphData) {
                 springLength: 200
             }
         }
-        
+
     };
 
     // Create a new Network instance if it doesn't exist, otherwise update the existing one
@@ -127,6 +128,7 @@ function clearGraph(event) {
                 console.log('Graph data cleared successfully');
                 // Refresh the graph
                 refreshGraph();
+                populateNodeDropdowns();
             } else {
                 // Error clearing graph data
                 console.error('Error clearing graph data');
@@ -137,10 +139,82 @@ function clearGraph(event) {
         });
 }
 
+// Function to populate the node dropdown menus
+function populateNodeDropdowns() {
+    const sourceNodeDropdown = document.getElementById('source-node');
+    const targetNodeDropdown = document.getElementById('target-node');
 
+    // Clear existing options
+    sourceNodeDropdown.innerHTML = '';
+    targetNodeDropdown.innerHTML = '';
 
+    // Fetch the graph data from the server
+    fetch('/data')
+        .then(response => response.json())
+        .then(data => {
+            // Populate options with node labels
+            data.nodes.forEach(node => {
+                const option = document.createElement('option');
+                option.value = node.id;
+                option.textContent = node.label;
+                sourceNodeDropdown.appendChild(option);
+                targetNodeDropdown.appendChild(option.cloneNode(true));
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching graph data:', error);
+        });
+}
+
+// Function to handle form submission for creating relationships
+function createRelationship(event) {
+    event.preventDefault();
+
+    const sourceNodeId = document.getElementById('source-node').value;
+    const targetNodeId = document.getElementById('target-node').value;
+    const relationshipLabel = document.getElementById('relationship-type').value;
+
+    if (sourceNodeId === targetNodeId) {
+        alert('Cannot create a relationship between the same node.');
+        return;
+      }
+
+    const relationshipData = {
+        sourceNodeId: sourceNodeId,
+        targetNodeId: targetNodeId,
+        relationshipLabel: relationshipLabel
+    };
+
+    fetch('/relationships', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(relationshipData)
+    })
+        .then(response => {
+            if (response.ok) {
+                console.log('Relationship created successfully');
+                console.log()
+                document.getElementById('relationship-type').value = '';
+                refreshGraph();
+                console.log(relationshipData);
+            } else {
+                console.error('Error creating relationship');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+// Attach event listener to the relationship form submission
+document.getElementById('relationship-form').addEventListener('submit', createRelationship);
 // Attach event listener to the form submission
 document.getElementById('node-form').addEventListener('submit', addNode);
 // Attach event listener to the form submission for clearing the graph
 document.getElementById('clear-form').addEventListener('submit', clearGraph);
-console.log(document.getElementById('clear-form')); 
+
+//Initialise graph and populate dropdown
+refreshGraph();
+populateNodeDropdowns();

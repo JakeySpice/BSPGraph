@@ -12,7 +12,7 @@ app.use(express.static('public'));
 // Graph data
 let graphData = {
     nodes: [],
-    relationships: []
+    relationships: [],
 };
 
 let nodeIdCounter = 0;
@@ -74,14 +74,39 @@ function generateNodeId() {
     return `node-${++nodeIdCounter}`;
     
 }
-// Function to create a new relationship
-function createRelationship(req, res) {
-    const { sourceNodeId, targetNodeId, relationshipType } = req.body;
-    // Create a new relationship object with the given source, target, and type
-    // Add the relationship to a local array or object
-    res.sendStatus(200);
-}
 
+function createRelationship(req, res) {
+    const { sourceNodeId, targetNodeId, relationshipLabel } = req.body;
+  
+    const sourceNode = graphData.nodes.find(node => node.id === sourceNodeId);
+    const targetNode = graphData.nodes.find(node => node.id === targetNodeId);
+  
+    if (sourceNode && targetNode) {
+      // Check if a relationship already exists between the source and target nodes
+      const existingRelationship = graphData.relationships.find(
+        relationship =>
+          relationship.from === sourceNode.id && relationship.to === targetNode.id
+      );
+  
+      if (existingRelationship) {
+        // If a relationship exists, update its label
+        existingRelationship.label = relationshipLabel;
+        res.json(existingRelationship);
+      } else {
+        // If no relationship exists, create a new one
+        const newRelationship = {
+          id: generateRelationshipId(),
+          from: sourceNode.id,
+          to: targetNode.id,
+          label: relationshipLabel
+        };
+        graphData.relationships.push(newRelationship);
+        res.json(newRelationship);
+      }
+    } else {
+      res.sendStatus(404);
+    }
+  }
 // Function to generate a unique ID for a relationship
 function generateRelationshipId() {
     return `relationship-${++relationshipIdCounter}`;
