@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial">
+    <title>LLM Chatbot with Knowledge Graph</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/vis-network/dist/vis-network.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/vis-network/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+  <div class="container">
+    <div class="graph-container">
+      <div id="network"></div>
+
+    </div>
+    <div class="chatbox-container">
+      <div class="chat-history">
+        <!-- Chat history will be displayed here -->
+      </div>
+      <form id="node-form">
+        <input type="text" id="user-input" placeholder="Enter node type">
+        <button type="submit">Add Node</button>
+      </form>
+      <form id="clear-form">
+        <button type="submit" id="clear-graph-btn">Clear Graph</button>
+      </form>
+    </div>
+  </div>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+  <script src="scripts.js"></script>
+
+</body>
+</html>
